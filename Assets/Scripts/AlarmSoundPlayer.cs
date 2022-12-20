@@ -12,7 +12,6 @@ public class AlarmSoundPlayer : MonoBehaviour
     private AudioSource _audioSource;
     private float maxVolume = 1.0f;
     private float minVolume = 0;
-    private bool _alarmSoundIsOn;
     private int _framesToChangeAlarmVolume = 1000;
     private Coroutine _alarmVolumeUpJob;
     private Coroutine _alarmVolumeDownJob;
@@ -23,31 +22,27 @@ public class AlarmSoundPlayer : MonoBehaviour
         _thiefDetector.ThiefIsGone += StopAlarmSound;
         _audioSource = GetComponent<AudioSource>();
         _audioSource.volume = 0;
+        _audioSource.loop = true;
     }
 
     private IEnumerator ChangeAlarmVolume(float targetVolume)
     {
         for (int i = 0; i < _framesToChangeAlarmVolume; i++)
         {
-            if (_alarmSoundIsOn)
-            {
-                _audioSource.volume = Mathf.MoveTowards(_audioSource.volume, targetVolume, maxVolume / _framesToChangeAlarmVolume);
-            }
+            _audioSource.volume = Mathf.MoveTowards(_audioSource.volume, targetVolume, maxVolume / _framesToChangeAlarmVolume);
 
-            if (_audioSource.volume == 0)
-            {
-                _audioSource.Stop();
-            }
 
             yield return null;
+        }
+
+        if (_audioSource.volume == 0)
+        {
+            _audioSource.Stop();
         }
     }
 
     private void PlayAlarmSound()
     {
-        _audioSource.loop = true;
-        _alarmSoundIsOn = true;
-
         if(_audioSource.isPlaying == false)
         {
             _audioSource.Play();
@@ -61,8 +56,6 @@ public class AlarmSoundPlayer : MonoBehaviour
 
     private void StopAlarmSound()
     {
-        _alarmSoundIsOn = false;
-
         if (_alarmVolumeUpJob != null)
             StopCoroutine(_alarmVolumeUpJob);
 
